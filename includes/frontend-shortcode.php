@@ -18,9 +18,9 @@ function sidreport_frontend_form() {
     <!-- Modal for Report Form -->
     <div id="sidreport-modal" style="display:none;">
         <div class="sidreport-modal-content">
-            <span id="sidreport-close-modal">&times;</span>
+            <span class="sidreport-close-modal">&times;</span> <!-- Tombol close -->
             <h2>Buat Laporan Baru</h2>
-            <form id="sidreport-report-form">
+            <form id="sidreport-report-form" enctype="multipart/form-data">
                 <label for="account">Account:</label>
                 <input type="text" id="account" name="account" required><br>
 
@@ -75,7 +75,7 @@ function sidreport_frontend_form() {
     <!-- Success Modal -->
     <div id="sidreport-success-modal" style="display:none;">
         <div class="sidreport-modal-content">
-            <span id="sidreport-close-success-modal">&times;</span>
+            <span class="sidreport-close-modal">&times;</span> <!-- Tombol close -->
             <h2>Terima Kasih</h2>
             <p>Terima kasih sudah mengirimkan laporan, data Anda akan segera kami proses.</p>
             <button id="sidreport-close-success-btn">Tutup</button>
@@ -106,15 +106,27 @@ function sidreport_frontend_form() {
             });
         });
 
-        // Buka modal dari tombol utama
-        $('#sidreport-open-modal-main').click(function() {
-            $('#sidreport-modal').fadeIn();
-        });
+    // Buka modal dari tombol utama
+    $('#sidreport-open-modal-main').click(function() {
+        $('#sidreport-modal').fadeIn();
+    });
 
-        // Tutup modal
-        $('.sidreport-close-modal').click(function() {
+    // Tutup modal dengan tombol close (class selector)
+    $(document).on('click', '.sidreport-close-modal', function() {
+        $('#sidreport-modal, #sidreport-success-modal').fadeOut();
+    });
+
+    // Tutup modal success dengan tombol "Tutup"
+    $('#sidreport-close-success-btn').click(function() {
+        $('#sidreport-success-modal').fadeOut();
+    });
+
+    // Tutup modal saat mengklik di luar modal
+    $(window).click(function(e) {
+        if ($(e.target).is('#sidreport-modal, #sidreport-success-modal')) {
             $('#sidreport-modal, #sidreport-success-modal').fadeOut();
-        });
+        }
+    });
 
         // Handle "Other" option for Jenis Account
         $('#jenis_account').change(function() {
@@ -135,27 +147,31 @@ function sidreport_frontend_form() {
         });
 
         // Submit Report Form via AJAX
-        $('#sidreport-report-form').submit(function(e) {
-            e.preventDefault();
-            var formData = new FormData(this);
+$('#sidreport-report-form').submit(function(e) {
+    e.preventDefault();
+    var formData = new FormData(this);
 
-            $.ajax({
-                url: '<?php echo admin_url('admin-ajax.php'); ?>',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    $('#sidreport-modal').fadeOut();
-                    $('#sidreport-success-modal').fadeIn();
-                }
-            });
-        });
+    // Tambahkan action ke FormData
+    formData.append('action', 'sidreport_submit_report');
 
-        // Close Success Modal
-        $('#sidreport-close-success-modal, #sidreport-close-success-btn').click(function() {
-            $('#sidreport-success-modal').fadeOut();
-        });
+    $.ajax({
+        url: '<?php echo admin_url('admin-ajax.php'); ?>',
+        type: 'POST',
+        data: formData,
+        processData: false, // Penting: jangan proses data
+        contentType: false, // Penting: jangan set content type
+        success: function(response) {
+            $('#sidreport-modal').fadeOut();
+            $('#sidreport-success-modal').fadeIn();
+        },
+        error: function(xhr, status, error) {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat mengirim laporan.');
+        }
+    });
+});
+
+
     });
     </script>
     <?php

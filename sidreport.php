@@ -45,3 +45,8 @@ function sidreport_enqueue_styles() {
     wp_enqueue_style('sidreport-style', plugin_dir_url(__FILE__) . 'includes/sidreport.css');
 }
 add_action('wp_enqueue_scripts', 'sidreport_enqueue_styles');
+function sidreport_admin_scripts() {
+    wp_enqueue_script('sidreport-admin', plugin_dir_url(__FILE__) . 'includes/sidreport-admin.js', array('jquery'), null, true);
+    wp_localize_script('sidreport-admin', 'ajaxurl', admin_url('admin-ajax.php'));
+}
+add_action('admin_enqueue_scripts', 'sidreport_admin_scripts');
