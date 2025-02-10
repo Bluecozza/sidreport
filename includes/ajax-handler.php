@@ -18,7 +18,8 @@ function sidreport_search_handler() {
     ));
 
     if (empty($results)) {
-        echo '<p>No results found. <a href="#">Report this account</a></p>';
+        echo '<p>Tidak ditemukan hasil. ';
+        echo '<a href="#" class="sidreport-open-modal">Laporkan akun ini</a></p>';
     } else {
         echo '<ul>';
         foreach ($results as $result) {
@@ -36,5 +37,50 @@ function sidreport_search_handler() {
         }
         echo '</ul>';
     }
+    wp_die();
+}
+
+// AJAX handler for submitting report
+add_action('wp_ajax_sidreport_submit_report', 'sidreport_submit_report_handler');
+add_action('wp_ajax_nopriv_sidreport_submit_report', 'sidreport_submit_report_handler');
+function sidreport_submit_report_handler() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'sidreport';
+
+    // Sanitize and validate input
+    $account = sanitize_text_field($_POST['account']);
+    $nama = sanitize_text_field($_POST['nama']);
+    $jenis_account = sanitize_text_field($_POST['jenis_account']);
+    $tanggal_dilaporkan = sanitize_text_field($_POST['tanggal_dilaporkan']);
+    $jenis_laporan = sanitize_text_field($_POST['jenis_laporan']);
+    $status_laporan = sanitize_text_field($_POST['status_laporan']);
+    $keterangan = sanitize_textarea_field($_POST['keterangan']);
+    $nama_pelapor = sanitize_text_field($_POST['nama_pelapor']);
+    $kontak_pelapor = sanitize_text_field($_POST['kontak_pelapor']);
+
+    // Handle "other" options
+    if ($jenis_account === 'other') {
+        $jenis_account = sanitize_text_field($_POST['jenis_account_other']);
+    }
+    if ($jenis_laporan === 'other') {
+        $jenis_laporan = sanitize_text_field($_POST['jenis_laporan_other']);
+    }
+
+    // Insert data into database
+    $wpdb->insert(
+        $table_name,
+        array(
+            'account' => $account,
+            'nama' => $nama,
+            'jenis_account' => $jenis_account,
+            'tanggal_dilaporkan' => $tanggal_dilaporkan,
+            'jenis_laporan' => $jenis_laporan,
+            'status_laporan' => $status_laporan,
+            'keterangan' => $keterangan,
+            'nama_pelapor' => $nama_pelapor,
+            'kontak_pelapor' => $kontak_pelapor
+        )
+    );
+
     wp_die();
 }

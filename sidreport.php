@@ -16,6 +16,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/admin-dashboard.php';
 require_once plugin_dir_path(__FILE__) . 'includes/frontend-shortcode.php';
 require_once plugin_dir_path(__FILE__) . 'includes/ajax-handler.php';
 
+
 // Activation hook
 register_activation_hook(__FILE__, 'sidreport_create_table');
 function sidreport_create_table() {
@@ -40,3 +41,7 @@ function sidreport_create_table() {
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     dbDelta($sql);
 }
+function sidreport_enqueue_styles() {
+    wp_enqueue_style('sidreport-style', plugin_dir_url(__FILE__) . 'includes/sidreport.css');
+}
+add_action('wp_enqueue_scripts', 'sidreport_enqueue_styles');
