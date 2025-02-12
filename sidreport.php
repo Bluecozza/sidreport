@@ -1,52 +1,27 @@
 <?php
-/*
-Plugin Name: SIDReport
-Description: Plugin untuk mengecek nomor rekening/akun online apakah terdaftar sebagai penipuan, scam, dan lain lain.
-Version: 0.1.0
-Author: Nur Muhammad Daim @satui.ID
-*/
+/**
+ * Plugin Name: SIDReport
+ * Plugin URI: https://yourwebsite.com
+ * Description: Plugin untuk mengecek dan melaporkan akun yang terindikasi scam atau penipuan.
+ * Version: 1.0.0
+ * Author: Nama Anda
+ * Author URI: https://yourwebsite.com
+ * License: GPL2
+ */
 
-// Prevent direct access
 if (!defined('ABSPATH')) {
     exit;
 }
 
-// Include necessary files
-require_once plugin_dir_path(__FILE__) . 'includes/admin-dashboard.php';
-require_once plugin_dir_path(__FILE__) . 'includes/frontend-shortcode.php';
-require_once plugin_dir_path(__FILE__) . 'includes/ajax-handler.php';
+// Definisikan path plugin
+define('SIDREPORT_PLUGIN_DIR', plugin_dir_path(__FILE__));
+define('SIDREPORT_PLUGIN_URL', plugin_dir_url(__FILE__));
 
+// Load file yang diperlukan
+require_once SIDREPORT_PLUGIN_DIR . 'includes/class-sidreport-db.php';
+require_once SIDREPORT_PLUGIN_DIR . 'includes/class-sidreport-ajax.php';
+require_once SIDREPORT_PLUGIN_DIR . 'includes/class-sidreport-admin.php';
+require_once SIDREPORT_PLUGIN_DIR . 'includes/class-sidreport-frontend.php';
 
-// Activation hook
-register_activation_hook(__FILE__, 'sidreport_create_table');
-function sidreport_create_table() {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'sidreport';
-    $charset_collate = $wpdb->get_charset_collate();
-
-    $sql = "CREATE TABLE $table_name (
-        id mediumint(9) NOT NULL AUTO_INCREMENT,
-        account varchar(255) NOT NULL,
-        nama varchar(255) NOT NULL,
-        jenis_account varchar(255) NOT NULL,
-        tanggal_dilaporkan date NOT NULL,
-        jenis_laporan varchar(255) NOT NULL,
-        status_laporan varchar(255) NOT NULL,
-        keterangan text NOT NULL,
-        nama_pelapor varchar(255) NOT NULL,
-        kontak_pelapor varchar(255) NOT NULL,
-        PRIMARY KEY (id)
-    ) $charset_collate;";
-
-    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-    dbDelta($sql);
-}
-function sidreport_enqueue_styles() {
-    wp_enqueue_style('sidreport-style', plugin_dir_url(__FILE__) . 'includes/sidreport.css');
-}
-add_action('wp_enqueue_scripts', 'sidreport_enqueue_styles');
-function sidreport_admin_scripts() {
-    wp_enqueue_script('sidreport-admin', plugin_dir_url(__FILE__) . 'includes/sidreport-admin.js', array('jquery'), null, true);
-    wp_localize_script('sidreport-admin', 'ajaxurl', admin_url('admin-ajax.php'));
-}
-add_action('admin_enqueue_scripts', 'sidreport_admin_scripts');
+// Inisialisasi Database saat aktivasi
+register_activation_hook(__FILE__, ['SIDReport_DB', 'install']);
